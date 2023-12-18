@@ -1,4 +1,2 @@
-﻿  cResourceManager.cpp
-  main.cpp
-  Generating Code...
-  ResourceManager.vcxproj -> C:\Users\ossikarl\Fork\sandboxStuff\ResourceManager\bin\Debug\ResourceManager.exe
+﻿  main.cpp
+C:\Users\osten04\ostgine\ResourceManager\source\main.cpp(9,10): error C1083: Cannot open include file: 'glf': No such file or directory
