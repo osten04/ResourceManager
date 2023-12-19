@@ -30,3 +30,16 @@
 *.exe
 *.out
 *.app
+.vs
+ResourceManager/obj
+BakeCompiler/obj
+bin
+obj
+*.user
+*.filters
+*.vcxproj
+*.pdb
+*.sln
+*.exe
+!ResourceManager/BakeCompiler.exe
+!premake5.exe

@@ -1,6 +1,0 @@
-﻿  cResourceManager.cpp
-C:\Users\ossikarl\Fork\sandboxStuff\ResourceManager\ResourceManager\source\ResourceManager\sBakedData.h(8,1): warning C4099: 'sBakedData': type name first seen using 'class' now seen using 'struct'
-C:\Users\ossikarl\Fork\sandboxStuff\ResourceManager\ResourceManager\source\ResourceManager\sBakedData.h(7,8): message : see declaration of 'sBakedData'
-  main.cpp
-  Generating Code...
-  ResourceManager.vcxproj -> C:\Users\ossikarl\Fork\sandboxStuff\ResourceManager\bin\Release\ResourceManager.exe
