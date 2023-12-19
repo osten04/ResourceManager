@@ -1,3 +1,9 @@
+local BGFX_DIR = "bgfx"
+local BIMG_DIR = "bimg"
+local BX_DIR   = "bx"
+local GLFW_DIR = "glfw"
+local proj_DIR = "ostgine"
+
 function setBxCompat()
    filter "action:vs*"
       includedirs { path.join(BX_DIR, "include/compat/msvc") }
@@ -8,20 +14,54 @@ function setBxCompat()
       buildoptions { "-x objective-c++" }
 end
 
-local BGFX_DIR = "bgfx"
-local BIMG_DIR = "bimg"
-local BX_DIR   = "bx"
-local GLFW_DIR = "glfw"
-local proj_DIR = "ostgine"
-
 workspace( proj_DIR )
    configurations { "Debug", "Release" }
-   cppdialect "C++20"
+   cppdialect "C++17"
    architecture ("x86_64")
    symbols "On"
+   buildoptions { "/Zc:__cplusplus" }
 
+project( proj_DIR )
+   kind "ConsoleApp"
+   language "C++"
+   location( proj_DIR )
+   targetdir "bin/%{cfg.buildcfg}"
+
+   files { path.join( proj_DIR, "source/**.h" ), path.join( proj_DIR, "source/**.cpp" ) }
    
-   project "BakeCompiler"
+   includedirs {
+      path.join( BGFX_DIR, "include"),
+      path.join( BX_DIR,   "include"),
+      path.join( GLFW_DIR, "include")
+   }
+
+   filter "configurations:Debug"
+      defines { 
+         "DEBUG",
+         "BX_CONFIG_DEBUG=1"
+      }
+      optimize "off"
+
+   filter "configurations:Release"
+      defines { 
+         "RELEASE",
+         "BX_CONFIG_DEBUG=0"
+      }
+      optimize "On"
+      prebuildcommands {
+         "$(ProjectDir)BakeCompiler.exe bakedData source\\ResourceManager\\sBakedData.h"
+      }
+
+   links { "bgfx", "bimg", "bx", "glfw" }
+   filter "system:windows"
+      links { "gdi32", "kernel32", "psapi" }
+   filter "system:linux"
+      links { "dl", "GL", "pthread", "X11" }
+   filter "system:macosx"
+      links { "QuartzCore.framework", "Metal.framework", "Cocoa.framework", "IOKit.framework", "CoreVideo.framework" }
+   setBxCompat()
+   
+project "BakeCompiler"
    kind "ConsoleApp"
    language "C++"
    location "BakeCompiler"
@@ -70,39 +110,50 @@ project "bgfx"
    }
    filter "action:vs*"
    defines "_CRT_SECURE_NO_WARNINGS"
-      excludes
-      {
-         path.join(BGFX_DIR, "src/glcontext_glx.cpp"),
-         path.join(BGFX_DIR, "src/glcontext_egl.cpp")
-      }
+   excludes
+   {
+      path.join(BGFX_DIR, "src/glcontext_glx.cpp"),
+      path.join(BGFX_DIR, "src/glcontext_egl.cpp")
+   }
    filter "system:macosx"
    files
-      {
-         path.join(BGFX_DIR, "src/*.mm"),
-      }
-      setBxCompat()
+   {
+      path.join(BGFX_DIR, "src/*.mm"),
+   }
+   filter "configurations:Release"
+		defines "BX_CONFIG_DEBUG=0"
+	filter "configurations:Debug"
+		defines "BX_CONFIG_DEBUG=1"
+	filter "action:vs*"
+		defines "_CRT_SECURE_NO_WARNINGS"
+   setBxCompat()
    
 project "bimg"
    kind "StaticLib"
    language "C++"
    exceptionhandling "Off"
    rtti "Off"
-   files
-   {
-         path.join(BIMG_DIR, "include/bimg/*.h"),
-         path.join(BIMG_DIR, "src/image.cpp"),
-         path.join(BIMG_DIR, "src/image_gnf.cpp"),
-         path.join(BIMG_DIR, "src/*.h"),
-         path.join(BIMG_DIR, "3rdparty/astc-codec/src/decoder/*.cc")
-      }
-      includedirs
-      {
-         path.join(BX_DIR, "include"),
-         path.join(BIMG_DIR, "include"),
-         path.join(BIMG_DIR, "3rdparty/astc-codec"),
-         path.join(BIMG_DIR, "3rdparty/astc-codec/include"),
-      }
-      setBxCompat()
+   files {
+      path.join(BIMG_DIR, "include/bimg/*.h"),
+      path.join(BIMG_DIR, "src/image.cpp"),
+      path.join(BIMG_DIR, "src/image_gnf.cpp"),
+      path.join(BIMG_DIR, "src/*.h"),
+      path.join(BIMG_DIR, "3rdparty/astc-codec/src/decoder/*.cc")
+   }
+   includedirs {
+      path.join(BX_DIR, "include"),
+      path.join(BIMG_DIR, "include"),
+      path.join(BIMG_DIR, "3rdparty/astc-codec"),
+      path.join(BIMG_DIR, "3rdparty/astc-codec/include"),
+   }
+
+   filter "configurations:Release"
+      defines "BX_CONFIG_DEBUG=0"
+   filter "configurations:Debug"
+      defines "BX_CONFIG_DEBUG=1"
+   filter "action:vs*"
+      defines "_CRT_SECURE_NO_WARNINGS"
+   setBxCompat()
    
 project "bx"
    kind "StaticLib"
@@ -127,11 +178,11 @@ project "bx"
       path.join(BX_DIR, "include")
    }
    filter "configurations:Release"
-   defines "BX_CONFIG_DEBUG=0"
+      defines "BX_CONFIG_DEBUG=0"
    filter "configurations:Debug"
-   defines "BX_CONFIG_DEBUG=1"
+      defines "BX_CONFIG_DEBUG=1"
    filter "action:vs*"
-   defines "_CRT_SECURE_NO_WARNINGS"
+      defines "_CRT_SECURE_NO_WARNINGS"
    setBxCompat()
    
 project "glfw"
@@ -189,44 +240,3 @@ project "glfw"
 
       filter "action:vs*"
       defines "_CRT_SECURE_NO_WARNINGS"
-
-project( proj_DIR )
-   kind "ConsoleApp"
-   language "C++"
-   location( proj_DIR )
-   targetdir "bin/%{cfg.buildcfg}"
-
-   files { path.join( proj_DIR, "source/**.h" ), path.join( proj_DIR, "source/**.cpp" ) }
-   
-   includedirs {
-      "bgfx/include",
-      path.join( BGFX_DIR, "include"),
-      path.join( BX_DIR,   "include"),
-      path.join( GLFW_DIR, "include")
-   }
-
-   filter "configurations:Debug"
-      defines { 
-         "DEBUG",
-         "BX_CONFIG_DEBUG=1"
-      }
-      optimize "off"
-
-   filter "configurations:Release"
-      defines { 
-         "RELEASE",
-         "BX_CONFIG_DEBUG=0"
-      }
-      optimize "On"
-      prebuildcommands {
-         "$(ProjectDir)BakeCompiler.exe bakedData source\\ResourceManager\\sBakedData.h"
-      }
-
-   links { "bgfx", "bimg", "bx", "glfw" }
-   filter "system:windows"
-      links { "gdi32", "kernel32", "psapi" }
-   filter "system:linux"
-      links { "dl", "GL", "pthread", "X11" }
-   filter "system:macosx"
-      links { "QuartzCore.framework", "Metal.framework", "Cocoa.framework", "IOKit.framework", "CoreVideo.framework" }
-   setBxCompat()
