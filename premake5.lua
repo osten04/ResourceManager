@@ -1,17 +1,18 @@
+local proj_DIR = "ostgine"
+
 local BGFX_DIR = "bgfx"
 local BIMG_DIR = "bimg"
 local BX_DIR   = "bx"
 local GLFW_DIR = "glfw"
-local proj_DIR = "ostgine"
 
 function setBxCompat()
    filter "action:vs*"
-      includedirs { path.join(BX_DIR, "include/compat/msvc") }
+   includedirs { path.join(BX_DIR, "include/compat/msvc") }
    filter { "system:windows", "action:gmake" }
-      includedirs { path.join(BX_DIR, "include/compat/mingw") }
+   includedirs { path.join(BX_DIR, "include/compat/mingw") }
    filter { "system:macosx" }
-      includedirs { path.join(BX_DIR, "include/compat/osx") }
-      buildoptions { "-x objective-c++" }
+   includedirs { path.join(BX_DIR, "include/compat/osx") }
+   buildoptions { "-x objective-c++" }
 end
 
 workspace( proj_DIR )
@@ -30,9 +31,9 @@ project( proj_DIR )
    files { path.join( proj_DIR, "source/**.h" ), path.join( proj_DIR, "source/**.cpp" ) }
    
    includedirs {
-      path.join( BGFX_DIR, "include"),
-      path.join( BX_DIR,   "include"),
-      path.join( GLFW_DIR, "include")
+      path.join( BGFX_DIR, "include" ),
+      path.join( BX_DIR,   "include" ),
+      path.join( GLFW_DIR, "include" )
    }
 
    filter "configurations:Debug"
@@ -66,7 +67,7 @@ project "BakeCompiler"
    language "C++"
    location "BakeCompiler"
    targetdir( proj_DIR )
-   debugdir( "$(SolutionDir)" .. proj_DIR .. "\\" )
+   debugdir( proj_DIR .. "\\" )
    debugargs { 
       "bakedData",
       "source\\ResourceManager\\sBakedData.h"
@@ -101,12 +102,13 @@ project "bgfx"
       path.join(BGFX_DIR, "src/amalgamated.cpp"),
    }
    includedirs {
-      path.join(BX_DIR, "include"),
+      path.join(BX_DIR,   "include"),
       path.join(BIMG_DIR, "include"),
       path.join(BGFX_DIR, "include"),
       path.join(BGFX_DIR, "3rdparty"),
       path.join(BGFX_DIR, "3rdparty/dxsdk/include"),
-      path.join(BGFX_DIR, "3rdparty/khronos")
+      path.join(BGFX_DIR, "3rdparty/khronos"),
+      path.join(BGFX_DIR, "3rdparty/directx-headers/include/directx")
    }
    filter "action:vs*"
    defines "_CRT_SECURE_NO_WARNINGS"
@@ -138,13 +140,13 @@ project "bimg"
       path.join(BIMG_DIR, "src/image.cpp"),
       path.join(BIMG_DIR, "src/image_gnf.cpp"),
       path.join(BIMG_DIR, "src/*.h"),
-      path.join(BIMG_DIR, "3rdparty/astc-codec/src/decoder/*.cc")
+      path.join(BIMG_DIR, "3rdparty/astc-encoder/src/decoder/*.cc")
    }
    includedirs {
       path.join(BX_DIR, "include"),
       path.join(BIMG_DIR, "include"),
-      path.join(BIMG_DIR, "3rdparty/astc-codec"),
-      path.join(BIMG_DIR, "3rdparty/astc-codec/include"),
+      path.join(BIMG_DIR, "3rdparty/astc-encoder"),
+      path.join(BIMG_DIR, "3rdparty/astc-encoder/include")
    }
 
    filter "configurations:Release"
