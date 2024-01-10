@@ -1,9 +1,10 @@
 local BUILD_DIR = "build"
 
-local BGFX_DIR = "bgfx"
-local BIMG_DIR = "bimg"
-local BX_DIR = "bx"
-local GLFW_DIR = "glfw"
+local BGFX_DIR    = "bgfx"
+local BIMG_DIR    = "bimg"
+local BX_DIR      = "bx"
+local GLFW_DIR    = "glfw"
+
 local OSTGINE_DIR = "ostgine"
 
 language "C++"
@@ -47,7 +48,7 @@ solution "OstGine"
 		{
 			"NDEBUG",
 			"BX_CONFIG_DEBUG=0"
-		}
+			}
 		optimize "Full"
 	
 	filter "configurations:Debug*"
@@ -68,30 +69,30 @@ function setBxCompat()
 		includedirs { path.join(BX_DIR, "include/compat/osx") }
 		buildoptions { "-x objective-c++" }
 end
-		
+
 project "OstGine"
-	kind "StaticLib"
+	kind "ConsoleApp"
 	language "C++"
 	location ( OSTGINE_DIR )
 	rtti "Off"
 
-   files 
-   { 
-      path.join( OSTGINE_DIR, "source/**.h" ), 
-      path.join( OSTGINE_DIR, "source/**.cpp" )
-   }
+   	files 
+   	{ 
+		path.join( OSTGINE_DIR, "source/**.h" ), 
+		path.join( OSTGINE_DIR, "source/**.cpp" )
+   	}
 
 	includedirs
 	{
-		path.join(BGFX_DIR, "include"),
-		path.join(BX_DIR, "include"),
-		path.join(GLFW_DIR, "include"),
+		path.join( BGFX_DIR, "include" ),
+		path.join( BX_DIR,   "include" ),
+		path.join( GLFW_DIR, "include" ),
 		OSTGINE_DIR
 	}
 
-	links { "bgfx", "bimg", "bx", "glfw", "imgui" }
+	links { "bgfx", "bimg", "bx", "glfw" }
 
-   filter "configurations:Release"
+   	filter "configurations:Release"
       prebuildcommands {
          "$(ProjectDir)BakeCompiler.exe bakedData source\\ResourceManager\\sBakedData.h"
       }
@@ -102,6 +103,46 @@ project "OstGine"
 		links { "dl", "GL", "pthread", "X11" }
 	filter "system:macosx"
 		links { "QuartzCore.framework", "Metal.framework", "Cocoa.framework", "IOKit.framework", "CoreVideo.framework" }
+	setBxCompat()
+
+project "bgfx"
+	kind "StaticLib"
+	language "C++"
+	exceptionhandling "Off"
+	rtti "Off"
+	defines "__STDC_FORMAT_MACROS"
+	location "bgfx"
+	files
+	{
+		path.join(BGFX_DIR, "include/bgfx/**.h"),
+		path.join(BGFX_DIR, "src/*.cpp"),
+		path.join(BGFX_DIR, "src/*.h"),
+	}
+	excludes
+	{
+		path.join(BGFX_DIR, "src/amalgamated.cpp"),
+	}
+	includedirs
+	{
+		path.join(BGFX_DIR, "3rdparty"),
+		path.join(BIMG_DIR, "include"),
+		path.join(BX_DIR, "include"),
+		path.join(BGFX_DIR, "3rdparty/directx-headers/include/directx"),
+		path.join(BGFX_DIR, "3rdparty/khronos"),
+		path.join(BGFX_DIR, "include")
+	}
+	filter "action:vs*"
+		defines "_CRT_SECURE_NO_WARNINGS"
+		excludes
+		{
+			path.join(BGFX_DIR, "src/glcontext_glx.cpp"),
+			path.join(BGFX_DIR, "src/glcontext_egl.cpp")
+		}
+	filter "system:macosx"
+		files
+		{
+			path.join(BGFX_DIR, "src/*.mm"),
+		}
 	setBxCompat()
 
 project "bimg"
@@ -131,7 +172,6 @@ project "bimg"
 project "bx"
 	kind "StaticLib"
 	language "C++"
-	cppdialect "C++14"
 	exceptionhandling "Off"
 	rtti "Off"
 	defines "__STDC_FORMAT_MACROS"
@@ -158,7 +198,7 @@ project "bx"
 	filter "configurations:Debug"
 		defines "BX_CONFIG_DEBUG=1"
 	filter "action:vs*"
-		defines "_CRT_SECURE_NO_WARNINGS"
+			defines "_CRT_SECURE_NO_WARNINGS"
 	setBxCompat()
 
 
